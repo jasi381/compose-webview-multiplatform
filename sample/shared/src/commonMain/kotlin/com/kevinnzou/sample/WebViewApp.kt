@@ -1,7 +1,11 @@
 package com.kevinnzou.sample
 
+import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -27,18 +31,26 @@ internal fun WebViewApp() {
     val controller = rememberNavController()
     NavHost(
         navController = controller,
-        startDestination = "main",
+        startDestination = "basic",
         enterTransition = {
             EnterTransition.None
         },
         exitTransition = {
-            ExitTransition.None
+            fadeOut()
         },
     ) {
-        composable("main") {
+        composable("main",
+            ) {
             MainScreen(controller)
         }
-        composable("basic") {
+        composable("basic",
+            enterTransition = {
+                slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Start, tween(700))
+            },
+            exitTransition = {
+                slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.End, tween(700))
+            },
+            ) {
             BasicWebViewSample(controller)
         }
         composable("html") {

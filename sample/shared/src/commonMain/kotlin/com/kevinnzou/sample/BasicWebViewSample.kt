@@ -1,23 +1,20 @@
 package com.kevinnzou.sample
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Button
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -29,7 +26,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import co.touchlab.kermit.Logger
@@ -53,7 +50,7 @@ import kotlinx.coroutines.flow.filter
  */
 @Composable
 internal fun BasicWebViewSample(navHostController: NavHostController? = null) {
-    val initialUrl = "https://github.com/KevinnZou/compose-webview-multiplatform"
+    val initialUrl = "https://cybercafe.group/"
     val state = rememberWebViewState(url = initialUrl)
     DisposableEffect(Unit) {
         state.webSettings.apply {
@@ -69,74 +66,58 @@ internal fun BasicWebViewSample(navHostController: NavHostController? = null) {
         mutableStateOf(state.lastLoadedUrl)
     }
     MaterialTheme {
-        Column {
-            TopAppBar(
-                title = { Text(text = "WebView Sample") },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        if (navigator.canGoBack) {
-                            navigator.navigateBack()
-                        } else {
-                            navHostController?.popBackStack()
+        Scaffold(
+            backgroundColor = Color.Transparent,
+            topBar = {
+                TopAppBar(
+                    elevation = 0.dp,
+                    backgroundColor = Color.Transparent,
+                    title = {
+                        Text(
+                            "Web View",
+
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(
+                            onClick = {
+                                if (navigator.canGoBack) {
+                                    navigator.navigateBack()
+                                } else {
+                                    navHostController?.popBackStack()
+                                }
+                            }) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = "Back",
+                            )
                         }
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back",
-                        )
-                    }
-                },
-            )
-
-            Row {
-                Box(modifier = Modifier.weight(1f)) {
-                    if (state.errorsForCurrentRequest.isNotEmpty()) {
-                        Image(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Error",
-                            colorFilter = ColorFilter.tint(Color.Red),
-                            modifier =
-                                Modifier
-                                    .align(Alignment.CenterEnd)
-                                    .padding(8.dp),
-                        )
                     }
 
-                    OutlinedTextField(
-                        value = textFieldValue ?: "",
-                        onValueChange = { textFieldValue = it },
-                        modifier = Modifier.fillMaxWidth(),
+                )
+            }) {
+            Box(Modifier.fillMaxSize()) {
+
+                val loadingState = state.loadingState
+                if (loadingState is LoadingState.Loading) {
+                    LinearProgressIndicator(
+                        progress = loadingState.progress,
+                        modifier = Modifier.fillMaxWidth()
+                            .align(Alignment.TopCenter),
                     )
                 }
 
-                Button(
-                    onClick = {
-                        textFieldValue?.let {
-                            navigator.loadUrl(it)
-                        }
-                    },
-                    modifier = Modifier.align(Alignment.CenterVertically),
-                ) {
-                    Text("Go")
-                }
-            }
-
-            val loadingState = state.loadingState
-            if (loadingState is LoadingState.Loading) {
-                LinearProgressIndicator(
-                    progress = loadingState.progress,
-                    modifier = Modifier.fillMaxWidth(),
+                WebView(
+                    state = state,
+                    modifier =
+                    Modifier
+                        .fillMaxSize().padding(it),
+                    navigator = navigator,
                 )
             }
 
-            WebView(
-                state = state,
-                modifier =
-                    Modifier
-                        .fillMaxSize(),
-                navigator = navigator,
-            )
         }
+
     }
 }
 
